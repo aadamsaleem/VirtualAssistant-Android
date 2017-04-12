@@ -1,0 +1,8 @@
+url:http://djustice-android.tumblr.com
+name:Aadam
+email:aadam.saleem@gmail.com
+gender:male
+botmaster:Aadam Saleem
+organization:NYU
+version:0.0.1
+
