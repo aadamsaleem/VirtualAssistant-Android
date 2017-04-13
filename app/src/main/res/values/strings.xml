@@ -2,8 +2,8 @@
     <string name="app_name">Virtual-Assistant</string>
     <string name="facebook_app_id">1778504395502177</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_chat">Chat</string>
+    <string name="title_news">News</string>
     <string name="title_notifications">Notifications</string>
     <string name="virtual_assistant">Virtual Assistant</string>
 

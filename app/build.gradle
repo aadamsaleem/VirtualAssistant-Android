@@ -22,6 +22,7 @@ android {
 
 repositories {
     jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -29,6 +30,8 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
+    compile files('libs/Ab.jar')
 
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:support-v4:25.3.1'
@@ -40,7 +43,8 @@ dependencies {
     compile 'com.android.support:support-vector-drawable:25.3.1'
     compile 'com.loopj.android:android-async-http:1.4.9'
     compile 'me.himanshusoni.chatmessageview:chat-message-view:1.0.3'
-    compile files('libs/Ab.jar')
+    compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.makeramen:roundedimageview:2.3.0'
     testCompile 'junit:junit:4.12'
-
 }
