@@ -81,56 +81,6 @@ public class UserManager {
         LoginManager.getInstance().logOut();
     }
 
-    public static void updateFBFriendList(JSONArray friendArray, final Context applicationContext, final CompletionInterface completionInterface) {
-
-        String url = Constants.BASE_URL + Constants.URL_FB_FRIEND_LIST_UPDATE;
-        JSONObject json = new JSONObject();
-        JSONArray friendJSONArray = new JSONArray();
-        try {
-            json.put("USER_TOKEN", PrefUtils.getCurrentUser(applicationContext).getToken());
-
-            for (int i = 0; i < friendArray.length(); i++) {
-                JSONObject friend = friendArray.getJSONObject(i);
-                friendJSONArray.put(friend.getString("id"));
-            }
-
-            json.put("LIST_OF_FRIENDS", friendJSONArray);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        AsyncHttpClient client = new AsyncHttpClient();
-        StringEntity se = null;
-        try {
-            se = new StringEntity(json.toString());
-        } catch (UnsupportedEncodingException e) {
-            // handle exceptions properly!
-        }
-        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-
-        client.post(applicationContext, url, se, "application/json", new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                if (statusCode == 200) {
-
-                    JSONObject resultJSON = null;
-                    try {
-                        resultJSON = new JSONObject(new String(responseBody));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    completionInterface.onSuccess(resultJSON);
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                completionInterface.onFailure();
-            }
-        });
-
-    }
 
     public static void updatePreferences(Context applicationContext, JSONObject jsonObject, final CompletionInterface completionInterface) {
         String url = Constants.BASE_URL + Constants.URL_UPDATE_PREFERENCES;
@@ -209,47 +159,6 @@ public class UserManager {
 
     }
 
-    public static void getUserFriends(Context context, final CompletionInterface completionInterface) {
-        String url = Constants.BASE_URL + Constants.URL_GET_FRIENDS;
-
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("USER_TOKEN", PrefUtils.getCurrentUser(context).getToken());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        AsyncHttpClient client = new AsyncHttpClient();
-        StringEntity se = null;
-        try {
-            se = new StringEntity(jsonObject.toString());
-        } catch (UnsupportedEncodingException e) {
-            // handle exceptions properly!
-        }
-        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-
-        client.post(context, url, se, "application/json", new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                if (statusCode == 200) {
-
-                    JSONObject resultJSON = null;
-                    try {
-                        resultJSON = new JSONObject(new String(responseBody));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    completionInterface.onSuccess(resultJSON);
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                completionInterface.onFailure();
-            }
-        });
-
-    }
     //endregion
 
 }

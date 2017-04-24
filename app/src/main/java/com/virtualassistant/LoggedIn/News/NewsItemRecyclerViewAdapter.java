@@ -1,28 +1,29 @@
 package com.virtualassistant.LoggedIn.News;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.virtualassistant.Constants;
 import com.virtualassistant.R;
 
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link News} and makes a call to the
- * specified {@link NewsFragment.OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
+
 public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRecyclerViewAdapter.ViewHolder> {
 
     private final List<News> mValues;
-    private final NewsFragment.OnListFragmentInteractionListener mListener;
+    private Context context;
 
-    public NewsItemRecyclerViewAdapter(List<News> items, NewsFragment.OnListFragmentInteractionListener listener) {
+    public NewsItemRecyclerViewAdapter(List<News> items, Context context) {
         mValues = items;
-        mListener = listener;
+        this.context = context;
     }
 
     @Override
@@ -33,19 +34,19 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText("Title"+mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
+        holder.title.setText(mValues.get(position).getTitle());
+        holder.descriptionTV.setText(mValues.get(position).getDescription());
+
+        ImageLoader.getInstance().displayImage(mValues.get(position).getImageURL(), holder.newsIV);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
+                Intent i = new Intent(context, WebViewActivity.class);
+                i.putExtra(Constants.KEY_NEWS_STRING, mValues.get(position).getUrl());
+                context.startActivity(i);
             }
         });
     }
@@ -57,20 +58,22 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
+        public final TextView title;
+        public final TextView descriptionTV;
+        public final ImageView newsIV;
         public News mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            title = (TextView) view.findViewById(R.id.title_textView);
+            descriptionTV = (TextView) view.findViewById(R.id.textView_description);
+            newsIV = (ImageView) view.findViewById(R.id.imageView_news_item);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            return super.toString() + " '" + descriptionTV.getText() + "'";
         }
     }
 }

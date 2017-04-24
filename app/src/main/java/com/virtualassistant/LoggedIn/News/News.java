@@ -5,18 +5,40 @@ package com.virtualassistant.LoggedIn.News;
  */
 
 public class News {
-    public final String id;
-    public final String content;
-    public final String details;
+    private String title;
+    private String description;
+    private String url;
+    private String imageURL;
 
-    public News(String id, String content, String details) {
-        this.id = id;
-        this.content = content;
-        this.details = details;
+    public String getTitle() {
+        return title;
     }
 
-    @Override
-    public String toString() {
-        return content;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
     }
 }

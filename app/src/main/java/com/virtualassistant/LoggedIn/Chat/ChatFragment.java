@@ -1,4 +1,4 @@
-package com.virtualassistant.LoggedIn.HomeFragment;
+package com.virtualassistant.LoggedIn.Chat;
 
 import android.content.res.AssetManager;
 import android.os.Bundle;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * Created by aadam on 11/4/2017.
  */
 
-public class HomeFragment extends android.support.v4.app.Fragment {
+public class ChatFragment extends android.support.v4.app.Fragment {
 
     public static Chat chat;
     public Bot bot;
@@ -47,11 +47,11 @@ public class HomeFragment extends android.support.v4.app.Fragment {
     private ChatMessageAdapter mAdapter;
     private View view;
 
-    public HomeFragment(){};
+    public ChatFragment(){};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view =  inflater.inflate(R.layout.fragment_home, container, false);
+        view =  inflater.inflate(R.layout.fragment_chat, container, false);
 
         setupViews();
 

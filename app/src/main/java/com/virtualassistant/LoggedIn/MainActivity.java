@@ -15,7 +15,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-import com.virtualassistant.LoggedIn.HomeFragment.HomeFragment;
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.virtualassistant.LoggedIn.Chat.ChatFragment;
 import com.virtualassistant.LoggedIn.News.NewsFragment;
 import com.virtualassistant.LoggedIn.Notification.NotificationFragment;
 import com.virtualassistant.R;
@@ -90,11 +97,13 @@ public class MainActivity extends AppCompatActivity {
 
         getViewIds();
 
+        initImageLoader();
+
         getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         );
 
-        homeFragment = new HomeFragment();
+        homeFragment = new ChatFragment();
         newsFragment = new NewsFragment();
         notificationFragment = new NotificationFragment();
 
@@ -109,6 +118,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void initImageLoader(){
+        DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
+                .resetViewBeforeLoading(true)
+                .cacheOnDisk(true)
+                .cacheInMemory(true)
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .displayer(new FadeInBitmapDisplayer(0))
+                .build();
+
+        ImageLoaderConfiguration imageLoaderConfiguration = new ImageLoaderConfiguration.Builder(getApplicationContext())
+                .threadPriority(Thread.NORM_PRIORITY - 1)
+                .denyCacheImageMultipleSizesInMemory()
+                .diskCacheFileNameGenerator(new Md5FileNameGenerator())
+                .tasksProcessingOrder(QueueProcessingType.LIFO)
+                .defaultDisplayImageOptions(displayImageOptions).build();
+
+        ImageLoader.getInstance().init(imageLoaderConfiguration);
+
+    }
+
     private void getViewIds() {
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
 
@@ -116,6 +145,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void addFragment(Fragment fragment) {
         final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.content, fragment).commit();
+        fragmentTransaction.add(R.id.textView_description, fragment).commit();
     }
 }

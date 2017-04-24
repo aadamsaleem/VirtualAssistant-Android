@@ -65,8 +65,8 @@ public class MyNotificationRecyclerViewAdapter extends RecyclerView.Adapter<MyNo
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mIdView = (TextView) view.findViewById(R.id.title_textView);
+            mContentView = (TextView) view.findViewById(R.id.textView_description);
         }
 
         @Override

@@ -1,4 +1,4 @@
-package com.virtualassistant.LoggedIn.HomeFragment;
+package com.virtualassistant.LoggedIn.Chat;
 
 import android.content.Context;
 import android.view.LayoutInflater;
