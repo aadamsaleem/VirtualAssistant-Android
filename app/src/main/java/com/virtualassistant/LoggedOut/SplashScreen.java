@@ -1,6 +1,5 @@
 package com.virtualassistant.LoggedOut;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -10,7 +9,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -20,16 +18,13 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.virtualassistant.LoggedIn.MainActivity;
+import com.virtualassistant.LoggedIn.HomeActivity;
 import com.virtualassistant.R;
-import com.virtualassistant.client.CompletionInterface;
-import com.virtualassistant.client.UserManager;
 import com.virtualassistant.models.User;
 import com.virtualassistant.util.PrefUtils;
 import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -92,7 +87,7 @@ public class SplashScreen extends AppCompatActivity {
 //                                            startActivity(intent);
 //                                        }
 //                                        else{
-                                            Intent intent = new Intent(SplashScreen.this, MainActivity.class);
+                                            Intent intent = new Intent(SplashScreen.this, HomeActivity.class);
                                             startActivity(intent);
 //                                        }
 //
@@ -151,7 +146,7 @@ public class SplashScreen extends AppCompatActivity {
 
         printKeyHash();
         if (PrefUtils.getCurrentUser(SplashScreen.this) != null) {
-            Intent homeIntent = new Intent(SplashScreen.this, MainActivity.class);
+            Intent homeIntent = new Intent(SplashScreen.this, HomeActivity.class);
             startActivity(homeIntent);
             finish();
         }

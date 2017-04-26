@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.virtualassistant.Constants;
 import com.virtualassistant.R;
+import com.virtualassistant.models.News;
 
 import java.util.List;
 

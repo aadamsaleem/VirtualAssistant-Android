@@ -1,0 +1,4 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_weather_white" android:state_selected="true" />
+    <item android:drawable="@drawable/ic_weather_gray" /> <!-- default -->
+</selector>

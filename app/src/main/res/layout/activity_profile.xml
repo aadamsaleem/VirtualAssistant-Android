@@ -49,7 +49,7 @@
             <ImageView
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:src="@drawable/preferneces_icon"
+                android:src="@drawable/ic_settings_gray"
                 android:layout_marginRight="15dp"/>
             <TextView
                 android:layout_width="wrap_content"

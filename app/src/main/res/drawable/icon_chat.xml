@@ -1,0 +1,4 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_chat_bubble_white" android:state_selected="true" />
+    <item android:drawable="@drawable/ic_chat_bubble_gray" /> <!-- default -->
+</selector>

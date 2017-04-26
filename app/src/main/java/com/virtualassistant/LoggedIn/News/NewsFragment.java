@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.virtualassistant.R;
 import com.virtualassistant.client.CompletionInterface;
 import com.virtualassistant.client.NewsManager;
+import com.virtualassistant.models.News;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +36,7 @@ public class NewsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.news_item_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_news, container, false);
 
         final Context context = view.getContext();
 
@@ -52,7 +53,6 @@ public class NewsFragment extends Fragment {
                 JSONArray articlesArray = null;
                 try {
                     articlesArray = result.getJSONArray("articles");
-
 
                     for (int i = 0; i < articlesArray.length(); i++) {
                         JSONObject article = articlesArray.getJSONObject(i);

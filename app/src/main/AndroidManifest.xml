@@ -28,11 +28,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".LoggedIn.MainActivity"
-            android:label="@string/title_activity_main"></activity>
         <activity android:name=".LoggedIn.ProfileActivity" />
-        <activity android:name=".LoggedIn.News.WebViewActivity"></activity>
+        <activity android:name=".LoggedIn.News.WebViewActivity" />
+        <activity
+            android:name=".LoggedIn.HomeActivity"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
