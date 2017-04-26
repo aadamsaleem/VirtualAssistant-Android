@@ -1,36 +1,29 @@
 package com.virtualassistant.LoggedIn.Chat;
 
-import android.content.res.AssetManager;
+import android.content.Context;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.design.widget.FloatingActionButton;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.virtualassistant.Constants;
 import com.virtualassistant.R;
+import com.virtualassistant.client.ChatManager;
+import com.virtualassistant.client.CompletionInterface;
 import com.virtualassistant.models.ChatMessage;
 
-//import org.alicebot.ab.AIMLProcessor;
-//import org.alicebot.ab.Bot;
-//import org.alicebot.ab.Chat;
-//import org.alicebot.ab.Graphmaster;
-//import org.alicebot.ab.MagicBooleans;
-//import org.alicebot.ab.MagicStrings;
-//import org.alicebot.ab.PCAIMLProcessorExtension;
-//import org.alicebot.ab.Timer;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 
 /**
@@ -39,128 +32,126 @@ import java.util.ArrayList;
 
 public class ChatFragment extends android.support.v4.app.Fragment {
 
-//    public static Chat chat;
+    //    public static Chat chat;
 //    public Bot bot;
     private ListView mListView;
     private TextView mButtonSend;
     private EditText mEditTextMessage;
     private ChatMessageAdapter mAdapter;
     private View view;
+    private JSONObject contextJson;
 
-    public ChatFragment(){};
+    public ChatFragment() {
+    }
+
+    ;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view =  inflater.inflate(R.layout.fragment_chat, container, false);
+        view = inflater.inflate(R.layout.fragment_chat, container, false);
 
         setupViews();
+        hideKeyBoard();
 
+        contextJson = new JSONObject();
         mAdapter = new ChatMessageAdapter(getContext(), new ArrayList<ChatMessage>());
         mListView.setAdapter(mAdapter);
+        mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+
+        mEditTextMessage.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(count>0){
+                    mButtonSend.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         //code for sending the message
         mButtonSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                hideKeyBoard();
                 String message = mEditTextMessage.getText().toString();
-                //bot
-//                String response = chat.multisentenceRespond(mEditTextMessage.getText().toString());
                 if (TextUtils.isEmpty(message)) {
                     return;
                 }
                 sendMessage(message);
-//                mimicOtherMessage(response);
                 mEditTextMessage.setText("");
                 mListView.setSelection(mAdapter.getCount() - 1);
             }
         });
-        //checking SD card availablility
-//        boolean a = isSDCARDAvailable();
-//        Log.e("a",""+a);
-//        //receiving the assets from the app directory
-//        AssetManager assets = getResources().getAssets();
-//        File jayDir = new File(Environment.getExternalStorageDirectory().toString() + "/aadam/bots/Aadam");
-//        boolean b = jayDir.mkdirs();
-//        Log.e("b",""+b);
-//        if (jayDir.exists()) {
-//            //Reading the file
-//            try {
-//                for (String dir : assets.list("Aadam")) {
-//                    File subdir = new File(jayDir.getPath() + "/" + dir);
-//                    boolean subdir_check = subdir.mkdirs();
-//                    for (String file : assets.list("Aadam/" + dir)) {
-//                        File f = new File(jayDir.getPath() + "/" + dir + "/" + file);
-//                        if (f.exists()) {
-//                            continue;
-//                        }
-//                        InputStream in = null;
-//                        OutputStream out = null;
-//                        in = assets.open("Aadam/" + dir + "/" + file);
-//                        out = new FileOutputStream(jayDir.getPath() + "/" + dir + "/" + file);
-//                        //copy file from assets to the mobile's SD card or any secondary memory
-//                        copyFile(in, out);
-//                        in.close();
-//                        in = null;
-//                        out.flush();
-//                        out.close();
-//                        out = null;
-//                    }
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        //get the working directory
-//        MagicStrings.root_path = Environment.getExternalStorageDirectory().toString() + "/aadam";
-//        System.out.println("Working Directory = " + MagicStrings.root_path);
-//        AIMLProcessor.extension =  new PCAIMLProcessorExtension();
-//        //Assign the AIML files to bot for processing
-//        bot = new Bot("Aadam", MagicStrings.root_path, "chat");
-//        chat = new Chat(bot);
-//        String[] args = null;
-//        mainFunction(args);
+
 
         return view;
     }
 
     //region private methods
-    private void setupViews(){
+    private void setupViews() {
 
         getViewIds();
 
 
     }
 
-    private void getViewIds(){
+    private void getViewIds() {
         mListView = (ListView) view.findViewById(R.id.listView);
         mButtonSend = (TextView) view.findViewById(R.id.btn_send);
         mEditTextMessage = (EditText) view.findViewById(R.id.et_message);
 
     }
 
-//    //check SD card availability
-//    public static boolean isSDCARDAvailable() {
-//        return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) ? true : false;
-//    }
-//
-//    //Request and response of user and the bot
-//    public static void mainFunction(String[] args) {
-//        MagicBooleans.trace_mode = false;
-//        System.out.println("trace mode = " + MagicBooleans.trace_mode);
-//        Graphmaster.enableShortCuts = true;
-//        Timer timer = new Timer();
-//        String request = "Hello.";
-//        String response = chat.multisentenceRespond(request);
-//
-//        System.out.println("Human: " + request);
-//        System.out.println("Robot: " + response);
-//    }
 
     private void sendMessage(String message) {
         ChatMessage chatMessage = new ChatMessage(message, true, false);
         mAdapter.add(chatMessage);
 
-        //mimicOtherMessage(message);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put(Constants.KEY_CHAT_TEXT, message);
+            jsonObject.put(Constants.KEY_CHAT_CONTEXT,contextJson);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        ChatManager.sendMessage(getActivity(), jsonObject, new CompletionInterface() {
+            @Override
+            public void onSuccess(JSONObject result) {
+
+                try {
+                    mimicOtherMessage(result.getString(Constants.KEY_CHAT_TEXT));
+                    contextJson = result.getJSONObject(Constants.KEY_CHAT_CONTEXT);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    JSONArray arrJson= result.getJSONArray("urls");
+                    for(int i=0;i<arrJson.length();i++) {
+                        mimicOtherURLMessage(arrJson.getString(i));
+                    }
+                }
+                catch (JSONException e){
+                }
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
     }
 
     private void mimicOtherMessage(String message) {
@@ -168,25 +159,18 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         mAdapter.add(chatMessage);
     }
 
-    private void sendMessage() {
-        ChatMessage chatMessage = new ChatMessage(null, true, true);
-        mAdapter.add(chatMessage);
-
-        mimicOtherMessage();
-    }
-    private void mimicOtherMessage() {
-        ChatMessage chatMessage = new ChatMessage(null, false, true);
+    private void mimicOtherURLMessage(String message) {
+        ChatMessage chatMessage = new ChatMessage(message, false, true);
         mAdapter.add(chatMessage);
     }
-
-//    //copying the file
-//    private void copyFile(InputStream in, OutputStream out) throws IOException {
-//        byte[] buffer = new byte[1024];
-//        int read;
-//        while ((read = in.read(buffer)) != -1) {
-//            out.write(buffer, 0, read);
-//        }
-//    }
     //endregion
+
+    private void hideKeyBoard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 
 }

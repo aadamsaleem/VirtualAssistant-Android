@@ -5,13 +5,13 @@ package com.virtualassistant.models;
  */
 
 public class ChatMessage {
-    private boolean isImage, isMine;
+    private boolean isURL, isMine;
     private String content;
 
-    public ChatMessage(String message, boolean mine, boolean image) {
+    public ChatMessage(String message, boolean mine, boolean isURL) {
         content = message;
         isMine = mine;
-        isImage = image;
+        this.isURL = isURL;
     }
 
     public String getContent() {
@@ -30,11 +30,11 @@ public class ChatMessage {
         this.isMine = isMine;
     }
 
-    public boolean isImage() {
-        return isImage;
+    public boolean isURL() {
+        return isURL;
     }
 
-    public void setIsImage(boolean isImage) {
-        this.isImage = isImage;
+    public void setIsURL(boolean isURL) {
+        this.isURL = isURL;
     }
 }

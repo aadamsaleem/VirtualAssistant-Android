@@ -16,9 +16,13 @@ import com.virtualassistant.client.RemoteFetch;
 
 import org.json.JSONObject;
 
+import java.sql.Time;
 import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class WeatherFragment extends Fragment {
     Typeface weatherFont;
@@ -46,14 +50,15 @@ public class WeatherFragment extends Fragment {
         weatherIcon = (TextView)rootView.findViewById(R.id.weather_icon);
 
         weatherIcon.setTypeface(weatherFont);
+
+        updateWeatherData("New York");
         return rootView;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         weatherFont = Typeface.createFromAsset(getActivity().getAssets(), "fonts/weather.ttf");
-        updateWeatherData("Sydney, AU");
+        super.onCreate(savedInstanceState);
     }
 
     private void updateWeatherData(final String city){
@@ -87,10 +92,20 @@ public class WeatherFragment extends Fragment {
 
             JSONObject details = json.getJSONArray("weather").getJSONObject(0);
             JSONObject main = json.getJSONObject("main");
+            JSONObject wind = json.getJSONObject("wind");
+
+
             detailsField.setText(
                     details.getString("description").toUpperCase(Locale.US) +
+                            "\n\n" + "Minimum: " + main.getString("temp_min") + "℃" +
+                            "\n" + "Maximum: " + main.getString("temp_max") + "℃" +
                             "\n" + "Humidity: " + main.getString("humidity") + "%" +
-                            "\n" + "Pressure: " + main.getString("pressure") + " hPa");
+                            "\n" + "Pressure: " + main.getString("pressure") + " hPa"+
+                            "\n\n" + "Wind Speed: " + wind.getString("speed") + " meter/sec" +
+                            "\n" + "Wind Direction: " + wind.getString("deg") + " degrees" +
+                            "\n\n" + "Cloudiness: " + json.getJSONObject("clouds").getString("all") + "%" +
+                            "\n\n" + "Sunrise: " + unixToTimeString(json.getJSONObject("sys").getString("sunrise")) +
+                            "\n" + "Sunset: " + unixToTimeString(json.getJSONObject("sys").getString("sunset")));
 
             currentTemperatureField.setText(
                     String.format("%.2f", main.getDouble("temp"))+ " ℃");
@@ -104,6 +119,7 @@ public class WeatherFragment extends Fragment {
                     json.getJSONObject("sys").getLong("sunset") * 1000);
 
         }catch(Exception e){
+            e.printStackTrace();
             Log.e("SimpleWeather", "One or more fields not found in the JSON data");
         }
     }
@@ -135,5 +151,10 @@ public class WeatherFragment extends Fragment {
             }
         }
         weatherIcon.setText(icon);
+    }
+
+    private String unixToTimeString(String unixTimeStamp){
+       Time time = new Time(Long.parseLong(unixTimeStamp)*1000L);
+        return time.toString();
     }
 }

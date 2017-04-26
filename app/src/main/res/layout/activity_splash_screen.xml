@@ -1,13 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:background="@color/colorPrimary">
 
 
-    <com.yqritc.scalablevideoview.ScalableVideoView
-        android:id="@+id/splash_background_video"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -29,8 +26,9 @@
             android:shadowDx="5"
             android:shadowDy="5"
             android:shadowRadius="1.6"
+            android:textStyle="bold"
             android:textAllCaps="true"
-            android:textColor="@android:color/white"
+            android:textColor="@color/colorAccent"
             android:text="@string/virtual_assistant"/>
 
         <com.facebook.login.widget.LoginButton

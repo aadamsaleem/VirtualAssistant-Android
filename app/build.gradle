@@ -47,6 +47,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.makeramen:roundedimageview:2.3.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
-    compile 'zh.wang.android:yweathergetter4a:1.3.0'
     testCompile 'junit:junit:4.12'
+    compile 'javax.inject:javax.inject:1'
 }

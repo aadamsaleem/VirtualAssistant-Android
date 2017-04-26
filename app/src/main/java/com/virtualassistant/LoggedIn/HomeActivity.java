@@ -1,5 +1,6 @@
 package com.virtualassistant.LoggedIn;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
@@ -32,6 +34,18 @@ import com.virtualassistant.LoggedIn.News.NewsFragment;
 import com.virtualassistant.LoggedIn.Settings.SettingsFragment;
 import com.virtualassistant.LoggedIn.Weather.WeatherFragment;
 import com.virtualassistant.R;
+
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -130,4 +144,6 @@ public class HomeActivity extends AppCompatActivity {
         ImageLoader.getInstance().init(imageLoaderConfiguration);
 
     }
+
+
 }

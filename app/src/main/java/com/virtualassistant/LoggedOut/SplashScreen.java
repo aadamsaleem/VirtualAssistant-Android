@@ -33,7 +33,6 @@ import java.security.NoSuchAlgorithmException;
 
 public class SplashScreen extends AppCompatActivity {
 
-    ScalableVideoView videoHolder;
     LoginButton loginButton;
     CallbackManager callbackManager;
     User user;
@@ -154,7 +153,6 @@ public class SplashScreen extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
 
         getViewIDs();
-        setUpBackgroundVideo();
 
     }
 
@@ -180,26 +178,7 @@ public class SplashScreen extends AppCompatActivity {
     //region Private Methods
     private void getViewIDs() {
 
-        videoHolder = (ScalableVideoView) findViewById(R.id.splash_background_video);
         loginButton = (LoginButton) findViewById(R.id.login_button);
-
-    }
-
-    private void setUpBackgroundVideo() {
-
-        try {
-            videoHolder.setRawData(R.raw.background_video);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        videoHolder.setLooping(true);
-        videoHolder.setScalableType(ScalableType.CENTER_CROP);
-        videoHolder.prepareAsync(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mediaPlayer) {
-                mediaPlayer.start();
-            }
-        });
 
     }
 
