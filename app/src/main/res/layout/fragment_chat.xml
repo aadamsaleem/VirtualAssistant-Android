@@ -5,6 +5,7 @@
 
 
 
+
     <!--To type and send the message-->
     <LinearLayout
         android:id="@+id/send_message_layout"
@@ -26,6 +27,12 @@
             android:hint="Type a message..."
             android:inputType="textShortMessage" />
 
+        <ImageView
+            android:id="@+id/mic_button"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:src="@drawable/ic_mic_gray"/>
+
 
         <TextView
             android:id="@+id/btn_send"
@@ -33,7 +40,7 @@
             android:layout_height="35dp"
             android:gravity="bottom"
             android:padding="6dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:text="Send"
             android:textColor="@android:color/holo_blue_dark"
             android:textSize="18sp"
@@ -57,7 +64,7 @@
         android:paddingBottom="8dp"
         android:background="@color/white"
         android:layout_above="@id/send_message_layout"
-        android:visibility="visible"/>
+        android:visibility="gone"/>
 
     <!--List view for displaying chat messages-->
     <ListView
@@ -68,6 +75,13 @@
         android:layout_above="@id/typing"
         android:divider="@null" />
 
+    <ImageView
+        android:id="@+id/recording"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_mic_gray"
+        android:visibility="gone"/>
 
 
 </RelativeLayout>

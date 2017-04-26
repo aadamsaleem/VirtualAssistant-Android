@@ -1,16 +1,22 @@
 package com.virtualassistant.LoggedIn.Chat;
 
 import android.content.Context;
+import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,8 +29,9 @@ import com.virtualassistant.models.ChatMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -42,6 +49,18 @@ public class ChatFragment extends android.support.v4.app.Fragment {
     private ChatMessageAdapter mAdapter;
     private View view;
     private JSONObject contextJson;
+
+    private ImageView mic_Button;
+    private ImageView recording;
+    private Animation animation;
+    private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
+    private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
+    private static final String AUDIO_RECORDER_FOLDER = "AudioRecorder";
+    private MediaRecorder recorder = null;
+    private int currentFormat = 0;
+    private int output_formats[] = { MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.OutputFormat.THREE_GPP};
+    private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
+
 
     public ChatFragment() {
     }
@@ -95,12 +114,37 @@ public class ChatFragment extends android.support.v4.app.Fragment {
             }
         });
 
+        mic_Button =(ImageView) view.findViewById(R.id.mic_button);
+        recording = (ImageView) view.findViewById(R.id.recording);
+
+        mic_Button.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // TODO Auto-generated method stub
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        startRecording();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        stopRecording();
+                        break;
+                }
+                return false;
+            }
+        });
+
 
         return view;
     }
 
     //region private methods
     private void setupViews() {
+
+        animation = new AlphaAnimation(1, 0); // Change alpha from fully visible to invisible
+        animation.setDuration(500); // duration - half a second
+        animation.setInterpolator(new LinearInterpolator()); // do not alter animation rate
+        animation.setRepeatCount(Animation.INFINITE); // Repeat animation infinitely
+        animation.setRepeatMode(Animation.REVERSE);
 
         getViewIds();
 
@@ -114,7 +158,6 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         typing = (TextView) view.findViewById(R.id.typing);
 
     }
-
 
     private void sendMessage(String message) {
         ChatMessage chatMessage = new ChatMessage(message, true, false);
@@ -169,6 +212,65 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         ChatMessage chatMessage = new ChatMessage(message, false, true);
         mAdapter.add(chatMessage);
         typing.setVisibility(View.GONE);
+    }
+
+    private String getFilename(){
+        String filepath = Environment.getExternalStorageDirectory().getPath();
+        File file = new File(filepath,AUDIO_RECORDER_FOLDER);
+
+        if(!file.exists()){
+            file.mkdirs();
+        }
+
+        return (file.getAbsolutePath() + "/" + System.currentTimeMillis() + file_exts[currentFormat]);
+    }
+
+    private void startRecording(){
+
+        recording.setVisibility(View.VISIBLE);
+        recording.startAnimation(animation);
+        if( recorder == null ) {
+            recorder = new MediaRecorder();
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            recorder.setOutputFormat(output_formats[currentFormat]);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            recorder.setOutputFile(getFilename());
+            recorder.setOnErrorListener(errorListener);
+            recorder.setOnInfoListener(infoListener);
+        }
+        try {
+            recorder.prepare();
+            recorder.start();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private MediaRecorder.OnErrorListener errorListener = new MediaRecorder.OnErrorListener() {
+        @Override
+        public void onError(MediaRecorder mr, int what, int extra) {
+        }
+    };
+
+    private MediaRecorder.OnInfoListener infoListener = new MediaRecorder.OnInfoListener() {
+        @Override
+        public void onInfo(MediaRecorder mr, int what, int extra) {
+        }
+    };
+
+    private void stopRecording(){
+
+        recording.setVisibility(View.GONE);
+        recording.clearAnimation();
+        if(null != recorder){
+            recorder.stop();
+            recorder.reset();
+            recorder.release();
+
+            recorder = null;
+        }
     }
     //endregion
 
