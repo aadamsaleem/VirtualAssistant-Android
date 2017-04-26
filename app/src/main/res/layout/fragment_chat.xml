@@ -48,6 +48,16 @@
         android:layout_height="1dp"
         android:layout_above="@id/send_message_layout"
         android:background="#f0f0f0" />
+    <TextView
+        android:id="@+id/typing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Assistant is typing..."
+        android:paddingLeft="8dp"
+        android:paddingBottom="8dp"
+        android:background="@color/white"
+        android:layout_above="@id/send_message_layout"
+        android:visibility="visible"/>
 
     <!--List view for displaying chat messages-->
     <ListView
@@ -55,7 +65,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
-        android:layout_above="@id/send_message_layout"
+        android:layout_above="@id/typing"
         android:divider="@null" />
+
+
 
 </RelativeLayout>

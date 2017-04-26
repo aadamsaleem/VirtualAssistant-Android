@@ -23,6 +23,7 @@ import com.virtualassistant.models.ChatMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -36,6 +37,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
 //    public Bot bot;
     private ListView mListView;
     private TextView mButtonSend;
+    private TextView typing;
     private EditText mEditTextMessage;
     private ChatMessageAdapter mAdapter;
     private View view;
@@ -109,6 +111,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         mListView = (ListView) view.findViewById(R.id.listView);
         mButtonSend = (TextView) view.findViewById(R.id.btn_send);
         mEditTextMessage = (EditText) view.findViewById(R.id.et_message);
+        typing = (TextView) view.findViewById(R.id.typing);
 
     }
 
@@ -117,6 +120,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         ChatMessage chatMessage = new ChatMessage(message, true, false);
         mAdapter.add(chatMessage);
 
+        typing.setVisibility(View.VISIBLE);
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put(Constants.KEY_CHAT_TEXT, message);
@@ -134,6 +138,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
                     mimicOtherMessage(result.getString(Constants.KEY_CHAT_TEXT));
                     contextJson = result.getJSONObject(Constants.KEY_CHAT_CONTEXT);
                 } catch (JSONException e) {
+                    typing.setVisibility(View.GONE);
                     e.printStackTrace();
                 }
 
@@ -157,11 +162,13 @@ public class ChatFragment extends android.support.v4.app.Fragment {
     private void mimicOtherMessage(String message) {
         ChatMessage chatMessage = new ChatMessage(message, false, false);
         mAdapter.add(chatMessage);
+        typing.setVisibility(View.GONE);
     }
 
     private void mimicOtherURLMessage(String message) {
         ChatMessage chatMessage = new ChatMessage(message, false, true);
         mAdapter.add(chatMessage);
+        typing.setVisibility(View.GONE);
     }
     //endregion
 
