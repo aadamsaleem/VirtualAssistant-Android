@@ -295,6 +295,11 @@ public class ChatFragment extends android.support.v4.app.Fragment {
             @Override
             public void onSuccess(JSONObject result) {
                 try {
+
+                    ChatMessage chatMessage = new ChatMessage(result.getString("transcript"), true, false);
+                    mAdapter.add(chatMessage);
+
+                    result = result.getJSONObject("response");
                     mimicOtherMessage(result.getString(Constants.KEY_CHAT_TEXT));
                     contextJson = result.getJSONObject(Constants.KEY_CHAT_CONTEXT);
                 } catch (JSONException e) {
@@ -320,6 +325,15 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         });
     }
     //endregion
+
+    @Override
+    public void onPause(){
+        if(textToSpeech !=null){
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onPause();
+    }
 
     private void hideKeyBoard() {
         View view = getActivity().getCurrentFocus();
