@@ -4,6 +4,8 @@ import android.content.Context;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.Voice;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -34,6 +36,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by aadam on 11/4/2017.
@@ -62,6 +65,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
     private int output_formats[] = { MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.OutputFormat.THREE_GPP};
     private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
     private String filename;
+    private TextToSpeech textToSpeech;
 
 
     public ChatFragment() {
@@ -135,6 +139,14 @@ public class ChatFragment extends android.support.v4.app.Fragment {
                 return true;
             }
         });
+        textToSpeech = new TextToSpeech(getContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status!= TextToSpeech.ERROR)
+                    textToSpeech.setLanguage(Locale.US);
+
+            }
+        });
 
 
         return view;
@@ -206,6 +218,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
     }
 
     private void mimicOtherMessage(String message) {
+        textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null);
         ChatMessage chatMessage = new ChatMessage(message, false, false);
         mAdapter.add(chatMessage);
         typing.setVisibility(View.GONE);
