@@ -13,6 +13,10 @@ public class Constants {
 
     public static final String CHATBOT_URL = "https://nbk6ta8rdb.execute-api.us-west-2.amazonaws.com/prod/botResponse";
 
+    //public static final String CHATBOT_SPEECH_URL = "http://node-express-env.z9cpgehgp7.us-west-2.elasticbeanstalk.com/bot";
+
+    public static final String CHATBOT_SPEECH_URL = "http://node-express-env.z9cpgehgp7.us-west-2.elasticbeanstalk.com/speech_analysis";
+
     public static final String URL_SIGN_UP = "user/test_login";
 
     public static final String URL_UPDATE_PREFERENCES = "user/update_preference";

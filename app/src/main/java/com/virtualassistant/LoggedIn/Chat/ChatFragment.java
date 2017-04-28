@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,11 +56,12 @@ public class ChatFragment extends android.support.v4.app.Fragment {
     private Animation animation;
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
-    private static final String AUDIO_RECORDER_FOLDER = "AudioRecorder";
+    private static final String AUDIO_RECORDER_FOLDER = "VirtualAssistant";
     private MediaRecorder recorder = null;
     private int currentFormat = 0;
     private int output_formats[] = { MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.OutputFormat.THREE_GPP};
     private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
+    private String filename;
 
 
     public ChatFragment() {
@@ -122,6 +124,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 // TODO Auto-generated method stub
                 switch(event.getAction()){
+
                     case MotionEvent.ACTION_DOWN:
                         startRecording();
                         break;
@@ -129,7 +132,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
                         stopRecording();
                         break;
                 }
-                return false;
+                return true;
             }
         });
 
@@ -186,7 +189,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
                 }
 
                 try {
-                    JSONArray arrJson= result.getJSONArray("urls");
+                    JSONArray arrJson= result.getJSONObject("context").getJSONArray("urls");
                     for(int i=0;i<arrJson.length();i++) {
                         mimicOtherURLMessage(arrJson.getString(i));
                     }
@@ -222,14 +225,14 @@ public class ChatFragment extends android.support.v4.app.Fragment {
             file.mkdirs();
         }
 
-        return (file.getAbsolutePath() + "/" + System.currentTimeMillis() + file_exts[currentFormat]);
+        filename =  (file.getAbsolutePath() + "/" + System.currentTimeMillis() + file_exts[currentFormat]);
+        return filename;
     }
 
     private void startRecording(){
 
         recording.setVisibility(View.VISIBLE);
         recording.startAnimation(animation);
-        if( recorder == null ) {
             recorder = new MediaRecorder();
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             recorder.setOutputFormat(output_formats[currentFormat]);
@@ -237,7 +240,6 @@ public class ChatFragment extends android.support.v4.app.Fragment {
             recorder.setOutputFile(getFilename());
             recorder.setOnErrorListener(errorListener);
             recorder.setOnInfoListener(infoListener);
-        }
         try {
             recorder.prepare();
             recorder.start();
@@ -260,17 +262,49 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         }
     };
 
-    private void stopRecording(){
+    private void stopRecording() {
 
         recording.setVisibility(View.GONE);
         recording.clearAnimation();
-        if(null != recorder){
+
+        try{
             recorder.stop();
             recorder.reset();
             recorder.release();
 
             recorder = null;
         }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        ChatManager.sendAudio(getActivity(), filename, new CompletionInterface() {
+            @Override
+            public void onSuccess(JSONObject result) {
+                try {
+                    mimicOtherMessage(result.getString(Constants.KEY_CHAT_TEXT));
+                    contextJson = result.getJSONObject(Constants.KEY_CHAT_CONTEXT);
+                } catch (JSONException e) {
+                    typing.setVisibility(View.GONE);
+                    e.printStackTrace();
+                }
+
+                try {
+                    JSONArray arrJson= result.getJSONObject(Constants.KEY_CHAT_CONTEXT).getJSONArray("urls");
+                    for(int i=0;i<arrJson.length();i++) {
+                        mimicOtherURLMessage(arrJson.getString(i));
+                    }
+                }
+                catch (JSONException e){
+                }
+
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
     }
     //endregion
 

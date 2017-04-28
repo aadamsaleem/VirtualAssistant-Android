@@ -3,9 +3,11 @@ package com.virtualassistant.client;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Looper;
+import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 import com.virtualassistant.Constants;
 
 
@@ -18,12 +20,18 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+
+import cz.msebera.android.httpclient.Header;
 
 
 /**
@@ -96,5 +104,36 @@ public class ChatManager {
             }
         }
         return sb.toString();
+    }
+
+    public static void sendAudio(final Activity activity, String filePath, final CompletionInterface completionInterface){
+        RequestParams params = new RequestParams();
+        final File file = new File(filePath);
+        try {
+            params.put("file", file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.post(Constants.CHATBOT_SPEECH_URL, params, new AsyncHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                System.out.println("statusCode "+statusCode);
+                Log.e("aaaaa",new String(responseBody));
+                try {
+                    completionInterface.onSuccess(new JSONObject(new String(responseBody)));
+                    file.delete();
+                } catch (JSONException e) {
+                    file.delete();
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                completionInterface.onFailure();
+            }
+        });
     }
 }
