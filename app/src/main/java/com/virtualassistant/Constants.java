@@ -15,7 +15,7 @@ public class Constants {
 
     public static final String CHATBOT_SPEECH_URL = "http://node-express-env.z9cpgehgp7.us-west-2.elasticbeanstalk.com/bot";
 
-//    public static final String CHATBOT_SPEECH_URL = "http://node-express-env.z9cpgehgp7.us-west-2.elasticbeanstalk.com/speech_analysis";
+    public static final String CHATBOT_SPEECH_ANALYSIS_URL = "http://node-express-env.z9cpgehgp7.us-west-2.elasticbeanstalk.com/speech_analysis";
 
     public static final String URL_SIGN_UP = "user/test_login";
 
@@ -30,4 +30,8 @@ public class Constants {
     public static final String KEY_CHAT_TEXT= "text";
 
     public static final String BASE_THUBMNAIL_URL = "https://api.thumbnail.ws/api/abcb462b6458b6797fb971de13de7dd2256144badbe8/thumbnail/get?url=";
+
+    public static final String EVENT_URL = "https://0i6bf7op1k.execute-api.us-west-2.amazonaws.com/prod/event";
+
+    public static final String ONE_SIGNAL_ID = "05974a8b-1893-4739-bec6-7e9c54f443db";
 }

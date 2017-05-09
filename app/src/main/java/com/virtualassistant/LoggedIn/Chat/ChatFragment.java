@@ -1,15 +1,15 @@
 package com.virtualassistant.LoggedIn.Chat;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.Voice;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.virtualassistant.Constants;
 import com.virtualassistant.R;
 import com.virtualassistant.client.ChatManager;
@@ -66,6 +68,9 @@ public class ChatFragment extends android.support.v4.app.Fragment {
     private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
     private String filename;
     private TextToSpeech textToSpeech;
+
+    FloatingActionMenu floatingActionMenu;
+    FloatingActionButton floatingActionButtonCamera, floatingActionButtonSpeech;
 
 
     public ChatFragment() {
@@ -134,6 +139,39 @@ public class ChatFragment extends android.support.v4.app.Fragment {
                         break;
                     case MotionEvent.ACTION_UP:
                         stopRecording();
+
+                        ChatManager.sendAudio(getActivity(), filename, new CompletionInterface() {
+                            @Override
+                            public void onSuccess(JSONObject result) {
+                                try {
+
+                                    ChatMessage chatMessage = new ChatMessage(result.getString("transcript"), true, false);
+                                    mAdapter.add(chatMessage);
+
+                                    result = result.getJSONObject("response");
+                                    mimicOtherMessage(result.getString(Constants.KEY_CHAT_TEXT));
+                                    contextJson = result.getJSONObject(Constants.KEY_CHAT_CONTEXT);
+                                } catch (JSONException e) {
+                                    typing.setVisibility(View.GONE);
+                                    e.printStackTrace();
+                                }
+
+                                try {
+                                    JSONArray arrJson= result.getJSONObject(Constants.KEY_CHAT_CONTEXT).getJSONArray("urls");
+                                    for(int i=0;i<arrJson.length();i++) {
+                                        mimicOtherURLMessage(arrJson.getString(i));
+                                    }
+                                }
+                                catch (JSONException e){
+                                }
+
+                            }
+
+                            @Override
+                            public void onFailure() {
+
+                            }
+                        });
                         break;
                 }
                 return true;
@@ -164,6 +202,68 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         getViewIds();
 
 
+        floatingActionButtonCamera.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //TODO something when floating action menu first item clicked
+
+            }
+        });
+        floatingActionButtonSpeech.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                floatingActionMenu.close(true);
+                startRecording();
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Recording...")
+                        .setMessage("Press OK when done.")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                               stopRecording();
+
+                                ChatManager.sendAnalysisAudio(filename, new CompletionInterface() {
+                                    @Override
+                                    public void onSuccess(JSONObject result) {
+                                        try {
+
+                                            ChatMessage chatMessage = new ChatMessage(result.getString("transcript"), true, false);
+                                            mAdapter.add(chatMessage);
+
+                                            mimicOtherMessage("Sentiment: "+ result.getString("sentiment"));
+                                            mimicOtherMessage("Keywords: "+ result.getJSONArray("keywords"));
+                                            mimicOtherMessage("Entities: " + result.getJSONArray("entities"));
+                                            contextJson = result.getJSONObject(Constants.KEY_CHAT_CONTEXT);
+                                        } catch (JSONException e) {
+                                            typing.setVisibility(View.GONE);
+                                            e.printStackTrace();
+                                        }
+
+                                        try {
+                                            JSONArray arrJson= result.getJSONObject(Constants.KEY_CHAT_CONTEXT).getJSONArray("urls");
+                                            for(int i=0;i<arrJson.length();i++) {
+                                                mimicOtherURLMessage(arrJson.getString(i));
+                                            }
+                                        }
+                                        catch (JSONException e){
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onFailure() {
+
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).show();
+
+            }
+        });
+
     }
 
     private void getViewIds() {
@@ -171,6 +271,10 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         mButtonSend = (TextView) view.findViewById(R.id.btn_send);
         mEditTextMessage = (EditText) view.findViewById(R.id.et_message);
         typing = (TextView) view.findViewById(R.id.typing);
+
+        floatingActionMenu = (FloatingActionMenu) view.findViewById(R.id.material_design_android_floating_action_menu);
+        floatingActionButtonCamera = (FloatingActionButton) view.findViewById(R.id.floating_action_menu_camera);
+        floatingActionButtonSpeech = (FloatingActionButton) view.findViewById(R.id.floating_action_menu_speech);
 
     }
 
@@ -291,38 +395,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
             e.printStackTrace();
         }
 
-        ChatManager.sendAudio(getActivity(), filename, new CompletionInterface() {
-            @Override
-            public void onSuccess(JSONObject result) {
-                try {
 
-                    ChatMessage chatMessage = new ChatMessage(result.getString("transcript"), true, false);
-                    mAdapter.add(chatMessage);
-
-                    result = result.getJSONObject("response");
-                    mimicOtherMessage(result.getString(Constants.KEY_CHAT_TEXT));
-                    contextJson = result.getJSONObject(Constants.KEY_CHAT_CONTEXT);
-                } catch (JSONException e) {
-                    typing.setVisibility(View.GONE);
-                    e.printStackTrace();
-                }
-
-                try {
-                    JSONArray arrJson= result.getJSONObject(Constants.KEY_CHAT_CONTEXT).getJSONArray("urls");
-                    for(int i=0;i<arrJson.length();i++) {
-                        mimicOtherURLMessage(arrJson.getString(i));
-                    }
-                }
-                catch (JSONException e){
-                }
-
-            }
-
-            @Override
-            public void onFailure() {
-
-            }
-        });
     }
     //endregion
 

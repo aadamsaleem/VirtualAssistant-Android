@@ -9,6 +9,7 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.virtualassistant.Constants;
+import com.virtualassistant.util.Util;
 
 
 import org.alicebot.ab.utils.IOUtils;
@@ -61,7 +62,7 @@ public class ChatManager {
                     /*Checking response */
                     if(response!=null){
                         InputStream in = response.getEntity().getContent(); //Get the data in the entity
-                        final JSONObject resultJson = new JSONObject(convertStreamToString(in));
+                        final JSONObject resultJson = new JSONObject(Util.convertStreamToString(in));
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -84,27 +85,7 @@ public class ChatManager {
         t.start();
     }
 
-    private static String convertStreamToString(InputStream is) {
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-
-        String line = null;
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append((line + "\n"));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return sb.toString();
-    }
 
     public static void sendAudio(final Activity activity, String filePath, final CompletionInterface completionInterface){
         RequestParams params = new RequestParams();
@@ -116,6 +97,37 @@ public class ChatManager {
         }
         AsyncHttpClient client = new AsyncHttpClient();
         client.post(Constants.CHATBOT_SPEECH_URL, params, new AsyncHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                System.out.println("statusCode "+statusCode);
+                Log.e("aaaaa",new String(responseBody));
+                try {
+                    completionInterface.onSuccess(new JSONObject(new String(responseBody)));
+                    file.delete();
+                } catch (JSONException e) {
+                    file.delete();
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                completionInterface.onFailure();
+            }
+        });
+    }
+
+    public static void sendAnalysisAudio(String filePath, final CompletionInterface completionInterface){
+        RequestParams params = new RequestParams();
+        final File file = new File(filePath);
+        try {
+            params.put("file", file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.post(Constants.CHATBOT_SPEECH_ANALYSIS_URL, params, new AsyncHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {

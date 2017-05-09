@@ -48,7 +48,6 @@ public class UserManager {
         try {
             se = new StringEntity(json.toString());
         } catch (UnsupportedEncodingException e) {
-            // handle exceptions properly!
         }
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 
@@ -90,7 +89,7 @@ public class UserManager {
         try {
             se = new StringEntity(jsonObject.toString());
         } catch (UnsupportedEncodingException e) {
-            // handle exceptions properly!
+
         }
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 

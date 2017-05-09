@@ -11,6 +11,9 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        manifestPlaceholders = [onesignal_app_id: "05974a8b-1893-4739-bec6-7e9c54f443db",
+                                // Project number pulled from dashboard, local value is ignored.
+                                onesignal_google_project_number: "REMOTE"]
     }
     buildTypes {
         release {
@@ -46,7 +49,9 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.makeramen:roundedimageview:2.3.0'
+    compile 'com.github.clans:fab:1.6.2'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+    compile 'com.onesignal:OneSignal:[3.5.3,4.0.0)'
     testCompile 'junit:junit:4.12'
     compile 'javax.inject:javax.inject:1'
 }

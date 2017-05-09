@@ -1,26 +1,18 @@
 package com.virtualassistant.LoggedIn;
 
-import android.content.Context;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-
-import android.view.inputmethod.InputMethodManager;
-import android.widget.TextView;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -29,23 +21,23 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.onesignal.OneSignal;
+import com.virtualassistant.Constants;
 import com.virtualassistant.LoggedIn.Chat.ChatFragment;
 import com.virtualassistant.LoggedIn.News.NewsFragment;
 import com.virtualassistant.LoggedIn.Settings.SettingsFragment;
 import com.virtualassistant.LoggedIn.Weather.WeatherFragment;
 import com.virtualassistant.R;
+import com.virtualassistant.client.CompletionInterface;
+import com.virtualassistant.client.EventManager;
 
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -53,6 +45,7 @@ public class HomeActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     private ViewPager mViewPager;
+    private boolean firstStart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +53,11 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         initImageLoader();
+
+        initOneSignal();
+
+        SharedPreferences prefs = getSharedPreferences("VA", MODE_PRIVATE);
+        firstStart = prefs.getBoolean("firstStart", true);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -80,6 +78,18 @@ public class HomeActivity extends AppCompatActivity {
         tabLayout.getTabAt(2).setIcon(R.drawable.icon_weather);
         tabLayout.getTabAt(3).setIcon(R.drawable.icon_settings);
 
+        if(firstStart){
+
+            sendAllEvents();
+        }
+
+    }
+
+    private void initOneSignal() {
+        OneSignal.startInit(this)
+                .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
+                .unsubscribeWhenNotificationsAreDisabled(true)
+                .init();
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -143,6 +153,65 @@ public class HomeActivity extends AppCompatActivity {
 
         ImageLoader.getInstance().init(imageLoaderConfiguration);
 
+    }
+
+    public void sendAllEvents(){
+        Cursor cursor = getApplicationContext().getContentResolver().query(Uri.parse("content://com.android.calendar/events"), new String[] { "calendar_id", "_id", "title", "description", "dtstart" }, null, null, null);
+        cursor.moveToFirst();
+
+        JSONObject requestJson = new JSONObject();
+        try {
+            requestJson.put("onsignal_playerId", Constants.ONE_SIGNAL_ID);
+
+            Date date = new Date();
+
+        JSONArray events = new JSONArray();
+        for (int i = 0; i < cursor.getCount(); i++) {
+
+            JSONObject eventJson = null;
+            if (date.before(new Date(getDate(Long.parseLong(cursor.getString(4)))))) {
+                eventJson = new JSONObject();
+
+                eventJson.put("Calender Id", cursor.getString(0));
+                eventJson.put("Event id", cursor.getString(1));
+                eventJson.put("summary", cursor.getString(2));
+                eventJson.put("description", cursor.getString(3));
+                eventJson.put("start_date", getDate(Long.parseLong(cursor.getString(4))));
+
+
+                events.put(eventJson);
+            }
+            cursor.moveToNext();
+
+        }
+
+        requestJson.put("onesignal_events",events);
+
+            Log.e("aaaa", requestJson.toString());
+            EventManager.sendAllEvents(this, requestJson, new CompletionInterface() {
+                @Override
+                public void onSuccess(JSONObject result) {
+
+                    Log.e("bbbb",result.toString());
+                }
+
+                @Override
+                public void onFailure() {
+
+                }
+            });
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+    public static String getDate(long milliSeconds) {
+        SimpleDateFormat formatter = new SimpleDateFormat(
+                "MMM dd, yyyy h:mm:ss a Z");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(milliSeconds);
+        return formatter.format(calendar.getTime());
     }
 
 
