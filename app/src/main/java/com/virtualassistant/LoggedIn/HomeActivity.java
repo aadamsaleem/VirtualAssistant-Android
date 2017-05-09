@@ -21,7 +21,10 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.onesignal.OSNotificationAction;
+import com.onesignal.OSNotificationOpenResult;
 import com.onesignal.OneSignal;
+import com.onesignal.OneSignal.NotificationOpenedHandler;
 import com.virtualassistant.Constants;
 import com.virtualassistant.LoggedIn.Chat.ChatFragment;
 import com.virtualassistant.LoggedIn.News.NewsFragment;
@@ -89,6 +92,7 @@ public class HomeActivity extends AppCompatActivity {
         OneSignal.startInit(this)
                 .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
                 .unsubscribeWhenNotificationsAreDisabled(true)
+                .setNotificationOpenedHandler(new ExampleNotificationOpenedHandler())
                 .init();
     }
 
@@ -206,6 +210,7 @@ public class HomeActivity extends AppCompatActivity {
         }
 
     }
+
     public static String getDate(long milliSeconds) {
         SimpleDateFormat formatter = new SimpleDateFormat(
                 "MMM dd, yyyy h:mm:ss a Z");
@@ -214,5 +219,38 @@ public class HomeActivity extends AppCompatActivity {
         return formatter.format(calendar.getTime());
     }
 
+    // This fires when a notification is opened by tapping on it or one is received while the app is running.
+    private class ExampleNotificationOpenedHandler implements NotificationOpenedHandler {
+        @Override
+        public void notificationOpened(OSNotificationOpenResult result) {
+            OSNotificationAction.ActionType actionType = result.action.type;
+            JSONObject data = result.notification.payload.additionalData;
+            String customKey;
+
+            if (data != null) {
+                customKey = data.optString("customkey", null);
+                if (customKey != null)
+                    Log.i("OneSignalExample", "customkey set with value: " + customKey);
+            }
+
+            if (actionType == OSNotificationAction.ActionType.ActionTaken)
+                Log.i("OneSignalExample", "Button pressed with id: " + result.action.actionID);
+
+            // The following can be used to open an Activity of your choice.
+
+            // Intent intent = new Intent(getApplication(), YourActivity.class);
+            // intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+            // startActivity(intent);
+
+            // Add the following to your AndroidManifest.xml to prevent the launching of your main Activity
+            //  if you are calling startActivity above.
+         /*
+            <application ...>
+              <meta-data android:name="com.onesignal.NotificationOpened.DEFAULT" android:value="DISABLE" />
+            </application>
+         */
+        }
+
+    }
 
 }

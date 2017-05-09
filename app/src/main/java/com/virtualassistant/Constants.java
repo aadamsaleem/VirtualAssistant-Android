@@ -33,5 +33,5 @@ public class Constants {
 
     public static final String EVENT_URL = "https://0i6bf7op1k.execute-api.us-west-2.amazonaws.com/prod/event";
 
-    public static final String ONE_SIGNAL_ID = "05974a8b-1893-4739-bec6-7e9c54f443db";
+    public static final String ONE_SIGNAL_ID = "f4c2e6f1-f386-4404-8c79-82c30fd156ac";
 }
