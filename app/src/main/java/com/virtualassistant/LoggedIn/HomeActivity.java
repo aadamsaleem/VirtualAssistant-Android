@@ -277,7 +277,10 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
             JSONObject data = result.notification.payload.additionalData;
             String type, value;
 
-            if (data != null) {
+            SharedPreferences prefs = getSharedPreferences("VA", MODE_PRIVATE);
+            boolean notificationCall = prefs.getBoolean("notificationCallSwitch", true);
+
+            if (notificationCall && data != null) {
                 type = data.optString("type", null);
                 value = data.optString("value", null);
                 switch (type) {
