@@ -11,7 +11,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-        manifestPlaceholders = [onesignal_app_id: "f4c2e6f1-f386-4404-8c79-82c30fd156ac",
+        manifestPlaceholders = [onesignal_app_id               : "f4c2e6f1-f386-4404-8c79-82c30fd156ac",
                                 // Project number pulled from dashboard, local value is ignored.
                                 onesignal_google_project_number: "REMOTE"]
     }
@@ -52,7 +52,7 @@ dependencies {
     compile 'com.github.clans:fab:1.6.2'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     compile 'com.onesignal:OneSignal:[3.5.3,4.0.0)'
-    testCompile 'junit:junit:4.12'
     compile 'javax.inject:javax.inject:1'
+    testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'

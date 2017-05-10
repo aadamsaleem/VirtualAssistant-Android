@@ -88,6 +88,7 @@ public class SplashScreen extends AppCompatActivity {
 //                                        else{
                                             Intent intent = new Intent(SplashScreen.this, HomeActivity.class);
                                             startActivity(intent);
+                                            finish();
 //                                        }
 //
 //                                        progressDialog.dismiss();

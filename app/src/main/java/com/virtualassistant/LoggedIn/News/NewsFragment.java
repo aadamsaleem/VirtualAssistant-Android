@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.virtualassistant.R;
-import com.virtualassistant.client.CompletionInterface;
+import com.virtualassistant.interfaces.CompletionInterface;
 import com.virtualassistant.client.NewsManager;
 import com.virtualassistant.models.News;
 

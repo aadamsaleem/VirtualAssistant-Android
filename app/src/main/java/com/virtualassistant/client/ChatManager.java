@@ -1,7 +1,6 @@
 package com.virtualassistant.client;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Looper;
 import android.util.Log;
 
@@ -9,10 +8,10 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.virtualassistant.Constants;
+import com.virtualassistant.interfaces.CompletionInterface;
 import com.virtualassistant.util.Util;
 
 
-import org.alicebot.ab.utils.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -24,13 +23,9 @@ import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 import cz.msebera.android.httpclient.Header;
 

@@ -93,8 +93,8 @@ public class SettingsFragment extends Fragment {
         preferencesLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent i = new Intent(mContext, PreferencesActivity.class);
-//                startActivity(i);
+                Intent i = new Intent(context, PreferencesActivity.class);
+                startActivity(i);
 
             }
         });

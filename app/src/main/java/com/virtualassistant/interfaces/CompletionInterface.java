@@ -1,4 +1,4 @@
-package com.virtualassistant.client;
+package com.virtualassistant.interfaces;
 
 import org.json.JSONObject;
 

@@ -1,11 +1,15 @@
 package com.virtualassistant.LoggedIn.Chat;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -28,7 +32,7 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.virtualassistant.Constants;
 import com.virtualassistant.R;
 import com.virtualassistant.client.ChatManager;
-import com.virtualassistant.client.CompletionInterface;
+import com.virtualassistant.interfaces.CompletionInterface;
 import com.virtualassistant.models.ChatMessage;
 
 import org.json.JSONArray;
@@ -46,6 +50,7 @@ import java.util.Locale;
 
 public class ChatFragment extends android.support.v4.app.Fragment {
 
+    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 2;
     //    public static Chat chat;
 //    public Bot bot;
     private ListView mListView;
@@ -131,7 +136,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         mic_Button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                // TODO Auto-generated method stub
+
                 switch(event.getAction()){
 
                     case MotionEvent.ACTION_DOWN:
@@ -347,16 +352,33 @@ public class ChatFragment extends android.support.v4.app.Fragment {
     }
 
     private void startRecording(){
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSIONS_REQUEST_RECORD_AUDIO);
+
+        }
+
+        record();
+
+    }
+
+    private void record(){
 
         recording.setVisibility(View.VISIBLE);
         recording.startAnimation(animation);
-            recorder = new MediaRecorder();
-            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(output_formats[currentFormat]);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            recorder.setOutputFile(getFilename());
-            recorder.setOnErrorListener(errorListener);
-            recorder.setOnInfoListener(infoListener);
+        recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(output_formats[currentFormat]);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        recorder.setOutputFile(getFilename());
+        recorder.setOnErrorListener(errorListener);
+        recorder.setOnInfoListener(infoListener);
         try {
             recorder.prepare();
             recorder.start();
@@ -366,7 +388,6 @@ public class ChatFragment extends android.support.v4.app.Fragment {
             e.printStackTrace();
         }
     }
-
     private MediaRecorder.OnErrorListener errorListener = new MediaRecorder.OnErrorListener() {
         @Override
         public void onError(MediaRecorder mr, int what, int extra) {
@@ -406,6 +427,21 @@ public class ChatFragment extends android.support.v4.app.Fragment {
             textToSpeech.shutdown();
         }
         super.onPause();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_RECORD_AUDIO: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    record();
+
+                }
+                return;
+            }
+        }
     }
 
     private void hideKeyBoard() {

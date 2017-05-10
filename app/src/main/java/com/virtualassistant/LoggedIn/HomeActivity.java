@@ -1,19 +1,22 @@
 package com.virtualassistant.LoggedIn;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -36,29 +39,40 @@ import com.virtualassistant.LoggedIn.News.NewsFragment;
 import com.virtualassistant.LoggedIn.Settings.SettingsFragment;
 import com.virtualassistant.LoggedIn.Weather.WeatherFragment;
 import com.virtualassistant.R;
-import com.virtualassistant.client.CompletionInterface;
+import com.virtualassistant.interfaces.CompletionInterface;
 import com.virtualassistant.client.EventManager;
+import com.virtualassistant.receiver.AlarmReceiver;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
 
 
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    private ViewPager mViewPager;
+    private static final int PERMISSIONS_REQUEST_READ_CALENDER = 1;
     private static String playerId;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
+    private AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
+
+    private TextToSpeech tts = null;
+    private String msg = "";
+    private boolean firstLaunch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        SharedPreferences prefs = getSharedPreferences("VA", MODE_PRIVATE);
+        firstLaunch = prefs.getBoolean("firstLaunch", true);
+
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent startingIntent = this.getIntent();
+        msg = startingIntent.getStringExtra("MESSAGE");
+        tts = new TextToSpeech(this, this);
 
         initImageLoader();
 
@@ -84,19 +98,62 @@ public class HomeActivity extends AppCompatActivity {
         tabLayout.getTabAt(2).setIcon(R.drawable.icon_weather);
         tabLayout.getTabAt(3).setIcon(R.drawable.icon_settings);
 
-        EventManager.sendAllEvents(this, getPlayerId(), new CompletionInterface() {
-            @Override
-            public void onSuccess(JSONObject result) {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CALENDAR)
+                != PackageManager.PERMISSION_GRANTED) {
 
-                Log.e("bbbb", result.toString());
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CALL_PHONE},
+                    PERMISSIONS_REQUEST_READ_CALENDER);
+        } else {
+            EventManager.sendAllEvents(this, getPlayerId(), new CompletionInterface() {
+                @Override
+                public void onSuccess(JSONObject result) {
+
+                }
+
+                @Override
+                public void onFailure() {
+
+                }
+            });
+        }
+
+        if (firstLaunch) {
+            setMorningAlarm();
+            firstLaunch = false;
+            SharedPreferences.Editor editor = getSharedPreferences("VA", MODE_PRIVATE).edit();
+            editor.putBoolean("firstLaunch", firstLaunch);
+            editor.commit();
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_READ_CALENDER: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    EventManager.sendAllEvents(this, getPlayerId(), new CompletionInterface() {
+                        @Override
+                        public void onSuccess(JSONObject result) {
+
+
+                        }
+
+                        @Override
+                        public void onFailure() {
+
+                        }
+                    });
+
+                }
+
+                return;
             }
-
-            @Override
-            public void onFailure() {
-
-            }
-        });
-
+        }
     }
 
 
@@ -141,6 +198,31 @@ public class HomeActivity extends AppCompatActivity {
         editor.putString("playerId", playerId);
         editor.commit();
         return playerId;
+    }
+
+    private void setMorningAlarm() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 18);
+        calendar.set(Calendar.MINUTE, 15);
+        calendar.set(Calendar.SECOND, 00);
+        Intent myIntent = new Intent(HomeActivity.this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(HomeActivity.this, 0, myIntent, 0);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+
+    }
+
+    @Override
+    public void onInit(int status) {
+        tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+
+    }
+
+    @Override
+    public void onUtteranceCompleted(String utteranceId) {
+        tts.shutdown();
+        tts = null;
+        finish();
+
     }
     //endregion
 
@@ -224,13 +306,7 @@ public class HomeActivity extends AppCompatActivity {
 
             intent.setData(Uri.parse("tel:" + number));
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+
                 return;
             }
             startActivity(intent);

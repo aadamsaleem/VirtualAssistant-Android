@@ -6,8 +6,8 @@ import android.util.Log;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.virtualassistant.Constants;
+import com.virtualassistant.interfaces.CompletionInterface;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 

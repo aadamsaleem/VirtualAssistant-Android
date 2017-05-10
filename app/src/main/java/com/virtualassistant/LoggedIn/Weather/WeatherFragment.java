@@ -12,17 +12,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.virtualassistant.R;
-import com.virtualassistant.client.RemoteFetch;
+import com.virtualassistant.client.WeatherManager;
 
 import org.json.JSONObject;
 
 import java.sql.Time;
 import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class WeatherFragment extends Fragment {
     Typeface weatherFont;
@@ -64,7 +61,7 @@ public class WeatherFragment extends Fragment {
     private void updateWeatherData(final String city){
         new Thread(){
             public void run(){
-                final JSONObject json = RemoteFetch.getJSON(getActivity(), city);
+                final JSONObject json = WeatherManager.getWeatherJSON(getActivity(), city);
                 if(json == null){
                     handler.post(new Runnable(){
                         public void run(){

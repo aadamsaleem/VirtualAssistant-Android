@@ -7,10 +7,10 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.virtualassistant.Constants;
+import com.virtualassistant.interfaces.CompletionInterface;
 import com.virtualassistant.models.User;
 import com.virtualassistant.util.PrefUtils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 

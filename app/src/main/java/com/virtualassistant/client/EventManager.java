@@ -1,6 +1,5 @@
 package com.virtualassistant.client;
 
-import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -8,13 +7,15 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.virtualassistant.Constants;
-import com.virtualassistant.LoggedIn.HomeActivity;
+import com.virtualassistant.interfaces.CompletionInterface;
 import com.virtualassistant.util.Util;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,7 +24,6 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by aadam on 8/5/2017.
@@ -40,14 +40,20 @@ public class EventManager {
         final JSONObject requestJson = new JSONObject();
         try {
             requestJson.put("onsignal_playerId", playerId);
+            Log.e("Aa pley", ""+playerId);
 
-            Date date = new Date();
+            Calendar startCal = Calendar.getInstance();
+
+            Calendar endcal = Calendar.getInstance();
+            endcal.add(Calendar.MONTH, 1);
 
             JSONArray events = new JSONArray();
             for (int i = 0; i < cursor.getCount(); i++) {
 
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(Long.parseLong(cursor.getString(4)));
                 JSONObject eventJson = null;
-                if (date.before(new Date(getDate(Long.parseLong(cursor.getString(4)))))) {
+                if (startCal.before(calendar) && endcal.after(calendar)) {
                     eventJson = new JSONObject();
 
                     eventJson.put("Calender Id", cursor.getString(0));
@@ -65,8 +71,7 @@ public class EventManager {
 
             requestJson.put("onesignal_events", events);
 
-            Log.e("aaaa", requestJson.toString());
-
+            Log.e("bbbb", ""+requestJson);
 
             final Thread t = new Thread() {
 
@@ -77,24 +82,21 @@ public class EventManager {
                     HttpResponse response;
 
                     try {
-                        HttpPost post = new HttpPost(Constants.EVENT_URL);
+                        HttpPut put = new HttpPut(Constants.EVENT_URL);
 
-                        org.apache.http.entity.StringEntity se = new org.apache.http.entity.StringEntity(requestJson.toString());
-                        se.setContentType(new org.apache.http.message.BasicHeader(org.apache.http.protocol.HTTP.CONTENT_TYPE, "application/json"));
-                        post.setEntity(se);
-                        response = client.execute(post);
+                        StringEntity se = new StringEntity(requestJson.toString());
+                        se.setContentType(new BasicHeader(org.apache.http.protocol.HTTP.CONTENT_TYPE, "application/json"));
+                        put.setEntity(se);
+                        response = client.execute(put);
 
                     /*Checking response */
                         if (response != null) {
                             InputStream in = response.getEntity().getContent(); //Get the data in the entity
                             final JSONArray resultJson = new JSONArray(Util.convertStreamToString(in));
-                            JSONObject result = new JSONObject();
-                                    try {
-                                        result.put("result", resultJson);
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    completionInterface.onSuccess(result);
+                            Log.e("aaaaa", resultJson.toString());
+
+
+                            completionInterface.onSuccess(null);
 
                         }
 
@@ -102,7 +104,7 @@ public class EventManager {
                         e.printStackTrace();
                     }
 
-                    Looper.loop(); //Loop in the message queue
+                    Looper.loop();
                 }
             };
 
@@ -113,8 +115,7 @@ public class EventManager {
     }
 
     private static String getDate(long milliSeconds) {
-        SimpleDateFormat formatter = new SimpleDateFormat(
-                "MMM dd, yyyy h:mm:ss a Z");
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy h:mm:ss a Z");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(milliSeconds);
         return formatter.format(calendar.getTime());
