@@ -32,6 +32,4 @@ public class Constants {
     public static final String BASE_THUBMNAIL_URL = "https://api.thumbnail.ws/api/abcb462b6458b6797fb971de13de7dd2256144badbe8/thumbnail/get?url=";
 
     public static final String EVENT_URL = "https://0i6bf7op1k.execute-api.us-west-2.amazonaws.com/prod/event";
-
-    public static final String ONE_SIGNAL_ID = "f4c2e6f1-f386-4404-8c79-82c30fd156ac";
 }

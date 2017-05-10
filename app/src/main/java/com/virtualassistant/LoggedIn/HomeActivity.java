@@ -1,11 +1,16 @@
 package com.virtualassistant.LoggedIn;
 
+import android.Manifest;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -13,6 +18,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -25,7 +31,6 @@ import com.onesignal.OSNotificationAction;
 import com.onesignal.OSNotificationOpenResult;
 import com.onesignal.OneSignal;
 import com.onesignal.OneSignal.NotificationOpenedHandler;
-import com.virtualassistant.Constants;
 import com.virtualassistant.LoggedIn.Chat.ChatFragment;
 import com.virtualassistant.LoggedIn.News.NewsFragment;
 import com.virtualassistant.LoggedIn.Settings.SettingsFragment;
@@ -48,7 +53,7 @@ public class HomeActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     private ViewPager mViewPager;
-    private boolean firstStart;
+    private static String playerId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +64,6 @@ public class HomeActivity extends AppCompatActivity {
 
         initOneSignal();
 
-        SharedPreferences prefs = getSharedPreferences("VA", MODE_PRIVATE);
-        firstStart = prefs.getBoolean("firstStart", true);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -81,20 +84,65 @@ public class HomeActivity extends AppCompatActivity {
         tabLayout.getTabAt(2).setIcon(R.drawable.icon_weather);
         tabLayout.getTabAt(3).setIcon(R.drawable.icon_settings);
 
-        if(firstStart){
+        EventManager.sendAllEvents(this, getPlayerId(), new CompletionInterface() {
+            @Override
+            public void onSuccess(JSONObject result) {
 
-            sendAllEvents();
-        }
+                Log.e("bbbb", result.toString());
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
 
     }
 
+
+    //region Private Methods
     private void initOneSignal() {
         OneSignal.startInit(this)
                 .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
                 .unsubscribeWhenNotificationsAreDisabled(true)
-                .setNotificationOpenedHandler(new ExampleNotificationOpenedHandler())
+                .setNotificationOpenedHandler(new EventNotificationOpenedHandler())
                 .init();
     }
+
+    private void initImageLoader() {
+        DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
+                .resetViewBeforeLoading(true)
+                .cacheOnDisk(true)
+                .cacheInMemory(true)
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .displayer(new FadeInBitmapDisplayer(0))
+                .build();
+
+        ImageLoaderConfiguration imageLoaderConfiguration = new ImageLoaderConfiguration.Builder(getApplicationContext())
+                .threadPriority(Thread.NORM_PRIORITY - 1)
+                .denyCacheImageMultipleSizesInMemory()
+                .diskCacheFileNameGenerator(new Md5FileNameGenerator())
+                .tasksProcessingOrder(QueueProcessingType.LIFO)
+                .defaultDisplayImageOptions(displayImageOptions).build();
+
+        ImageLoader.getInstance().init(imageLoaderConfiguration);
+
+    }
+
+    private String getPlayerId() {
+        OneSignal.idsAvailable(new OneSignal.IdsAvailableHandler() {
+            @Override
+            public void idsAvailable(String userId, String registrationId) {
+                playerId = userId;
+            }
+        });
+
+        SharedPreferences.Editor editor = getSharedPreferences("VA", MODE_PRIVATE).edit();
+        editor.putString("playerId", playerId);
+        editor.commit();
+        return playerId;
+    }
+    //endregion
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
@@ -139,116 +187,78 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void initImageLoader(){
-        DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
-                .resetViewBeforeLoading(true)
-                .cacheOnDisk(true)
-                .cacheInMemory(true)
-                .imageScaleType(ImageScaleType.EXACTLY)
-                .displayer(new FadeInBitmapDisplayer(0))
-                .build();
-
-        ImageLoaderConfiguration imageLoaderConfiguration = new ImageLoaderConfiguration.Builder(getApplicationContext())
-                .threadPriority(Thread.NORM_PRIORITY - 1)
-                .denyCacheImageMultipleSizesInMemory()
-                .diskCacheFileNameGenerator(new Md5FileNameGenerator())
-                .tasksProcessingOrder(QueueProcessingType.LIFO)
-                .defaultDisplayImageOptions(displayImageOptions).build();
-
-        ImageLoader.getInstance().init(imageLoaderConfiguration);
-
-    }
-
-    public void sendAllEvents(){
-        Cursor cursor = getApplicationContext().getContentResolver().query(Uri.parse("content://com.android.calendar/events"), new String[] { "calendar_id", "_id", "title", "description", "dtstart" }, null, null, null);
-        cursor.moveToFirst();
-
-        JSONObject requestJson = new JSONObject();
-        try {
-            requestJson.put("onsignal_playerId", Constants.ONE_SIGNAL_ID);
-
-            Date date = new Date();
-
-        JSONArray events = new JSONArray();
-        for (int i = 0; i < cursor.getCount(); i++) {
-
-            JSONObject eventJson = null;
-            if (date.before(new Date(getDate(Long.parseLong(cursor.getString(4)))))) {
-                eventJson = new JSONObject();
-
-                eventJson.put("Calender Id", cursor.getString(0));
-                eventJson.put("Event id", cursor.getString(1));
-                eventJson.put("summary", cursor.getString(2));
-                eventJson.put("description", cursor.getString(3));
-                eventJson.put("start_date", getDate(Long.parseLong(cursor.getString(4))));
-
-
-                events.put(eventJson);
-            }
-            cursor.moveToNext();
-
-        }
-
-        requestJson.put("onesignal_events",events);
-
-            Log.e("aaaa", requestJson.toString());
-            EventManager.sendAllEvents(this, requestJson, new CompletionInterface() {
-                @Override
-                public void onSuccess(JSONObject result) {
-
-                    Log.e("bbbb",result.toString());
-                }
-
-                @Override
-                public void onFailure() {
-
-                }
-            });
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public static String getDate(long milliSeconds) {
-        SimpleDateFormat formatter = new SimpleDateFormat(
-                "MMM dd, yyyy h:mm:ss a Z");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(milliSeconds);
-        return formatter.format(calendar.getTime());
-    }
-
     // This fires when a notification is opened by tapping on it or one is received while the app is running.
-    private class ExampleNotificationOpenedHandler implements NotificationOpenedHandler {
+    private class EventNotificationOpenedHandler implements NotificationOpenedHandler {
         @Override
         public void notificationOpened(OSNotificationOpenResult result) {
             OSNotificationAction.ActionType actionType = result.action.type;
             JSONObject data = result.notification.payload.additionalData;
-            String customKey;
+            String type, value;
 
             if (data != null) {
-                customKey = data.optString("customkey", null);
-                if (customKey != null)
-                    Log.i("OneSignalExample", "customkey set with value: " + customKey);
+                type = data.optString("type", null);
+                value = data.optString("value", null);
+                switch (type) {
+                    case "phonenumber":
+                        phonecall(value);
+                        break;
+                    case "skype":
+                        skype(value);
+                        break;
+                    case "hangout":
+                        hangout(value);
+                        break;
+                }
+                if (type != null)
+                    Log.i("OneSignalExample", "customkey set with value: " + type);
             }
 
             if (actionType == OSNotificationAction.ActionType.ActionTaken)
                 Log.i("OneSignalExample", "Button pressed with id: " + result.action.actionID);
 
-            // The following can be used to open an Activity of your choice.
 
-            // Intent intent = new Intent(getApplication(), YourActivity.class);
-            // intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
-            // startActivity(intent);
+        }
 
-            // Add the following to your AndroidManifest.xml to prevent the launching of your main Activity
-            //  if you are calling startActivity above.
-         /*
-            <application ...>
-              <meta-data android:name="com.onesignal.NotificationOpened.DEFAULT" android:value="DISABLE" />
-            </application>
-         */
+        private void phonecall(String number) {
+            Intent intent = new Intent(Intent.ACTION_CALL);
+
+            intent.setData(Uri.parse("tel:" + number));
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            startActivity(intent);
+        }
+
+        private void skype(String link) {
+            try {
+
+                Intent sky = new Intent("android.intent.action.VIEW");
+                sky.setData(Uri.parse("skype:" + link + "?call&video=true"));
+                startActivity(sky);
+            } catch (ActivityNotFoundException e) {
+                Log.e("SKYPE CALL", "Skype failed", e);
+                Toast.makeText(getApplicationContext(), "Unable to place Skype Call", Toast.LENGTH_LONG).show();
+            }
+
+        }
+
+        private void hangout(String link) {
+            try {
+                Intent hangout = new Intent("android.intent.action.VIEW");
+                hangout.setData(Uri.parse(link));
+                startActivity(hangout);
+            } catch (ActivityNotFoundException e) {
+                Log.e("SKYPE CALL", "Skype failed", e);
+                Toast.makeText(getApplicationContext(), "Unable to place Hangout Call", Toast.LENGTH_LONG).show();
+            }
+
         }
 
     }
