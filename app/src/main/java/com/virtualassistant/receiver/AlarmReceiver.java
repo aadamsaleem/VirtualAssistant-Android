@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.virtualassistant.LoggedIn.HomeActivity;
+import com.virtualassistant.client.CallLogManager;
 import com.virtualassistant.interfaces.CompletionInterface;
 import com.virtualassistant.client.NewsManager;
 import com.virtualassistant.client.WeatherManager;
@@ -41,6 +42,9 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
 
         SharedPreferences prefs = context.getSharedPreferences("VA", MODE_PRIVATE);
         boolean morningNotification = prefs.getBoolean("morningWishSwitch", true);
+        String playerId = prefs.getString("playerId",null);
+
+        CallLogManager.sendTodaysLog(context, playerId);
 
         if (morningNotification) {
             final Handler handler = new Handler();

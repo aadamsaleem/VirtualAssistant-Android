@@ -3,12 +3,10 @@ package com.virtualassistant.LoggedIn;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.TabLayout;
@@ -20,8 +18,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -30,10 +26,6 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
-import com.onesignal.OSNotificationAction;
-import com.onesignal.OSNotificationOpenResult;
-import com.onesignal.OneSignal;
-import com.onesignal.OneSignal.NotificationOpenedHandler;
 import com.virtualassistant.LoggedIn.Chat.ChatFragment;
 import com.virtualassistant.LoggedIn.News.NewsFragment;
 import com.virtualassistant.LoggedIn.Settings.SettingsFragment;
@@ -77,9 +69,6 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
         tts = new TextToSpeech(this, this);
 
         initImageLoader();
-
-
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -125,7 +114,7 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
             editor.putBoolean("firstLaunch", firstLaunch);
             editor.commit();
 
-            CallLogManager.getAllLog(getApplicationContext(), playerId);
+            CallLogManager.sendAllLog(getApplicationContext(), playerId);
         }
 
     }
@@ -194,8 +183,8 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     private void setMorningAlarm() {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 18);
-        calendar.set(Calendar.MINUTE, 15);
+        calendar.set(Calendar.HOUR_OF_DAY, 8);
+        calendar.set(Calendar.MINUTE, 00);
         calendar.set(Calendar.SECOND, 00);
         Intent myIntent = new Intent(HomeActivity.this, AlarmReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(HomeActivity.this, 0, myIntent, 0);
