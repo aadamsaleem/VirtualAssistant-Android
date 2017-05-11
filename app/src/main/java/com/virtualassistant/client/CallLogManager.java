@@ -22,7 +22,6 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
@@ -108,7 +107,7 @@ public class CallLogManager {
             e.printStackTrace();
         }
 
-        final Thread t = new Thread(){
+        final Thread t = new Thread() {
             public void run() {
                 Looper.prepare();
 
@@ -124,7 +123,8 @@ public class CallLogManager {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                multipartEntity.addPart("File", new FileBody(new File(filename)));
+                Log.e("aaaaa", filename);
+                multipartEntity.addPart("file", new FileBody(new File(filename)));
                 httppost.setEntity(multipartEntity);
 
                 try {
@@ -148,9 +148,6 @@ public class CallLogManager {
             }
         };
         t.start();
-
-
-
 
 
     }
@@ -230,7 +227,7 @@ public class CallLogManager {
             e.printStackTrace();
         }
 
-        final Thread t = new Thread(){
+        final Thread t = new Thread() {
             public void run() {
                 Looper.prepare();
 
@@ -270,9 +267,6 @@ public class CallLogManager {
             }
         };
         t.start();
-
-
-
 
 
     }
