@@ -39,6 +39,7 @@ import com.virtualassistant.LoggedIn.News.NewsFragment;
 import com.virtualassistant.LoggedIn.Settings.SettingsFragment;
 import com.virtualassistant.LoggedIn.Weather.WeatherFragment;
 import com.virtualassistant.R;
+import com.virtualassistant.client.CallLogManager;
 import com.virtualassistant.interfaces.CompletionInterface;
 import com.virtualassistant.client.EventManager;
 import com.virtualassistant.receiver.AlarmReceiver;
@@ -68,6 +69,7 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         SharedPreferences prefs = getSharedPreferences("VA", MODE_PRIVATE);
         firstLaunch = prefs.getBoolean("firstLaunch", true);
+        playerId = prefs.getString("playerId",null);
 
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent startingIntent = this.getIntent();
@@ -76,7 +78,7 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         initImageLoader();
 
-        initOneSignal();
+
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -98,15 +100,12 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
         tabLayout.getTabAt(2).setIcon(R.drawable.icon_weather);
         tabLayout.getTabAt(3).setIcon(R.drawable.icon_settings);
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_CALENDAR)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CALL_PHONE},
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CALL_PHONE, Manifest.permission.READ_CALL_LOG},
                     PERMISSIONS_REQUEST_READ_CALENDER);
         } else {
-            EventManager.sendAllEvents(this, getPlayerId(), new CompletionInterface() {
+            EventManager.sendAllEvents(this, playerId, new CompletionInterface() {
                 @Override
                 public void onSuccess(JSONObject result) {
 
@@ -125,6 +124,8 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
             SharedPreferences.Editor editor = getSharedPreferences("VA", MODE_PRIVATE).edit();
             editor.putBoolean("firstLaunch", firstLaunch);
             editor.commit();
+
+            CallLogManager.getAllLog(getApplicationContext(), playerId);
         }
 
     }
@@ -136,7 +137,7 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    EventManager.sendAllEvents(this, getPlayerId(), new CompletionInterface() {
+                    EventManager.sendAllEvents(this, playerId, new CompletionInterface() {
                         @Override
                         public void onSuccess(JSONObject result) {
 
@@ -156,15 +157,18 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
     }
 
+    @Override
+    protected void onDestroy() {
 
-    //region Private Methods
-    private void initOneSignal() {
-        OneSignal.startInit(this)
-                .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
-                .unsubscribeWhenNotificationsAreDisabled(true)
-                .setNotificationOpenedHandler(new EventNotificationOpenedHandler())
-                .init();
+        if(tts != null) {
+
+            tts.stop();
+            tts.shutdown();
+        }
+        super.onDestroy();
     }
+    //region Private Methods
+
 
     private void initImageLoader() {
         DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
@@ -186,19 +190,7 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     }
 
-    private String getPlayerId() {
-        OneSignal.idsAvailable(new OneSignal.IdsAvailableHandler() {
-            @Override
-            public void idsAvailable(String userId, String registrationId) {
-                playerId = userId;
-            }
-        });
 
-        SharedPreferences.Editor editor = getSharedPreferences("VA", MODE_PRIVATE).edit();
-        editor.putString("playerId", playerId);
-        editor.commit();
-        return playerId;
-    }
 
     private void setMorningAlarm() {
         Calendar calendar = Calendar.getInstance();
@@ -267,79 +259,6 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
             }
             return null;
         }
-    }
-
-    // This fires when a notification is opened by tapping on it or one is received while the app is running.
-    private class EventNotificationOpenedHandler implements NotificationOpenedHandler {
-        @Override
-        public void notificationOpened(OSNotificationOpenResult result) {
-            OSNotificationAction.ActionType actionType = result.action.type;
-            JSONObject data = result.notification.payload.additionalData;
-            String type, value;
-
-            SharedPreferences prefs = getSharedPreferences("VA", MODE_PRIVATE);
-            boolean notificationCall = prefs.getBoolean("notificationCallSwitch", true);
-
-            if (notificationCall && data != null) {
-                type = data.optString("type", null);
-                value = data.optString("value", null);
-                switch (type) {
-                    case "phonenumber":
-                        phonecall(value);
-                        break;
-                    case "skype":
-                        skype(value);
-                        break;
-                    case "hangout":
-                        hangout(value);
-                        break;
-                }
-                if (type != null)
-                    Log.i("OneSignalExample", "customkey set with value: " + type);
-            }
-
-            if (actionType == OSNotificationAction.ActionType.ActionTaken)
-                Log.i("OneSignalExample", "Button pressed with id: " + result.action.actionID);
-
-
-        }
-
-        private void phonecall(String number) {
-            Intent intent = new Intent(Intent.ACTION_CALL);
-
-            intent.setData(Uri.parse("tel:" + number));
-            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-
-                return;
-            }
-            startActivity(intent);
-        }
-
-        private void skype(String link) {
-            try {
-
-                Intent sky = new Intent("android.intent.action.VIEW");
-                sky.setData(Uri.parse("skype:" + link + "?call&video=true"));
-                startActivity(sky);
-            } catch (ActivityNotFoundException e) {
-                Log.e("SKYPE CALL", "Skype failed", e);
-                Toast.makeText(getApplicationContext(), "Unable to place Skype Call", Toast.LENGTH_LONG).show();
-            }
-
-        }
-
-        private void hangout(String link) {
-            try {
-                Intent hangout = new Intent("android.intent.action.VIEW");
-                hangout.setData(Uri.parse(link));
-                startActivity(hangout);
-            } catch (ActivityNotFoundException e) {
-                Log.e("SKYPE CALL", "Skype failed", e);
-                Toast.makeText(getApplicationContext(), "Unable to place Hangout Call", Toast.LENGTH_LONG).show();
-            }
-
-        }
-
     }
 
 }

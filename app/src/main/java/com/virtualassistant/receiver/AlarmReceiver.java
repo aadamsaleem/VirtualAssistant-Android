@@ -23,7 +23,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class AlarmReceiver extends WakefulBroadcastReceiver {
 
-    public static String ordinal(int i) {
+    private static String ordinal(int i) {
         String[] sufixes = new String[]{"th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"};
         switch (i % 100) {
             case 11:

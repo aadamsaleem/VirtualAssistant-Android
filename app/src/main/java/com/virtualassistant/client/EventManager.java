@@ -40,12 +40,11 @@ public class EventManager {
         final JSONObject requestJson = new JSONObject();
         try {
             requestJson.put("onsignal_playerId", playerId);
-            Log.e("Aa pley", ""+playerId);
 
             Calendar startCal = Calendar.getInstance();
 
             Calendar endcal = Calendar.getInstance();
-            endcal.add(Calendar.MONTH, 1);
+            endcal.add(Calendar.DATE, 1);
 
             JSONArray events = new JSONArray();
             for (int i = 0; i < cursor.getCount(); i++) {
@@ -70,8 +69,6 @@ public class EventManager {
             }
 
             requestJson.put("onesignal_events", events);
-
-            Log.e("bbbb", ""+requestJson);
 
             final Thread t = new Thread() {
 
