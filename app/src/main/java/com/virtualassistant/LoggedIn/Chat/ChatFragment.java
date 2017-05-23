@@ -352,23 +352,6 @@ public class ChatFragment extends android.support.v4.app.Fragment {
     }
 
     private void startRecording(){
-        if (ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        PERMISSIONS_REQUEST_RECORD_AUDIO);
-
-        }
-
-        record();
-
-    }
-
-    private void record(){
 
         recording.setVisibility(View.VISIBLE);
         recording.startAnimation(animation);
@@ -387,7 +370,9 @@ public class ChatFragment extends android.support.v4.app.Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
+
     private MediaRecorder.OnErrorListener errorListener = new MediaRecorder.OnErrorListener() {
         @Override
         public void onError(MediaRecorder mr, int what, int extra) {
@@ -436,7 +421,7 @@ public class ChatFragment extends android.support.v4.app.Fragment {
             case PERMISSIONS_REQUEST_RECORD_AUDIO: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    record();
+                   startRecording();
 
                 }
                 return;

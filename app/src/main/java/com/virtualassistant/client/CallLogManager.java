@@ -236,14 +236,14 @@ public class CallLogManager {
                 params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
                 mHttpClient = new DefaultHttpClient(params);
 
-                HttpPost httppost = new HttpPost(Constants.CALL_LOG_CREATE_URL);
+                HttpPost httppost = new HttpPost(Constants.CALL_LOG_UPDATE_URL);
                 MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
                 try {
                     multipartEntity.addPart("Device_id", new StringBody(playerId));
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                multipartEntity.addPart("File", new FileBody(new File(filename)));
+                multipartEntity.addPart("file", new FileBody(new File(filename)));
                 httppost.setEntity(multipartEntity);
 
                 try {

@@ -96,7 +96,6 @@ public class ChatManager {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 System.out.println("statusCode "+statusCode);
-                Log.e("aaaaa",new String(responseBody));
                 try {
                     completionInterface.onSuccess(new JSONObject(new String(responseBody)));
                     file.delete();
@@ -126,8 +125,8 @@ public class ChatManager {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                System.out.println("statusCode "+statusCode);
-                Log.e("aaaaa",new String(responseBody));
+                Log.e("statusCode ",""+statusCode);
+                Log.e("aaaahahahaa",""+new String(responseBody));
                 try {
                     completionInterface.onSuccess(new JSONObject(new String(responseBody)));
                     file.delete();
