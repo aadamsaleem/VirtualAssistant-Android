@@ -1,15 +1,13 @@
 package com.virtualassistant.LoggedIn.Chat;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.speech.tts.TextToSpeech;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -30,6 +28,7 @@ import android.widget.TextView;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.virtualassistant.Constants;
+import com.virtualassistant.LoggedIn.camera.CameraActivity;
 import com.virtualassistant.R;
 import com.virtualassistant.client.ChatManager;
 import com.virtualassistant.interfaces.CompletionInterface;
@@ -209,7 +208,8 @@ public class ChatFragment extends android.support.v4.app.Fragment {
 
         floatingActionButtonCamera.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //TODO something when floating action menu first item clicked
+               Intent i = new Intent(getActivity(), CameraActivity.class);
+                startActivity(i);
 
             }
         });
