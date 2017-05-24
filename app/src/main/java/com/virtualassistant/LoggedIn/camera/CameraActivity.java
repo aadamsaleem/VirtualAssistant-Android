@@ -271,7 +271,7 @@ public class CameraActivity extends AppCompatActivity {
                             showSnackBar(Constants.SERVER_CONNECTIVITY_ISSUE);
                         }
                     });
-                
+
             }
         });
     }
