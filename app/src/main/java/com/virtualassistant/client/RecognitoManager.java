@@ -1,6 +1,7 @@
 package com.virtualassistant.client;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Looper;
@@ -49,6 +50,8 @@ import java.util.ArrayList;
 
 public class RecognitoManager {
 
+
+
     private RecognitoManager() {
     }
 
@@ -71,7 +74,12 @@ public class RecognitoManager {
         multipartEntity.addPart("file", new FileBody(image.getImageFile()));
         try {
 
+
             multipartEntity.addPart("contactid", new StringBody(""+image.getId()));
+//            SharedPreferences preferences = context.getSharedPreferences("VA", Context.MODE_PRIVATE);
+//            String playerId = preferences.getString("playerId", null);
+//            multipartEntity.addPart("userid", new StringBody(playerId));
+            multipartEntity.addPart("userid", new StringBody("kiran12345"));
             multipartEntity.addPart("imagename", new StringBody(image.getPersonName() + System.currentTimeMillis()+ ".jpg"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -112,6 +120,10 @@ public class RecognitoManager {
         JSONObject resultJson = null;
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<>();
         nameValuePairs.add(new BasicNameValuePair("base64", base64String));
+//        SharedPreferences preferences = context.getSharedPreferences("VA", Context.MODE_PRIVATE);
+//        String playerId = preferences.getString("playerId", null);
+//        nameValuePairs.add(new BasicNameValuePair("userid", playerId));
+        nameValuePairs.add(new BasicNameValuePair("userid", "kiran12345"));
         try {
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(Constants.TEST_IMAGE_URL);
