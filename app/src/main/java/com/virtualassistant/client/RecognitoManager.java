@@ -78,8 +78,8 @@ public class RecognitoManager {
             multipartEntity.addPart("contactid", new StringBody(""+image.getId()));
 //            SharedPreferences preferences = context.getSharedPreferences("VA", Context.MODE_PRIVATE);
 //            String playerId = preferences.getString("playerId", null);
-//            multipartEntity.addPart("userid", new StringBody(playerId));
-            multipartEntity.addPart("userid", new StringBody("kiran12345"));
+            multipartEntity.addPart("userid", new StringBody(Constants.userID));
+//            multipartEntity.addPart("userid", new StringBody("kiran12345"));
             multipartEntity.addPart("imagename", new StringBody(image.getPersonName() + System.currentTimeMillis()+ ".jpg"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -122,8 +122,8 @@ public class RecognitoManager {
         nameValuePairs.add(new BasicNameValuePair("base64", base64String));
 //        SharedPreferences preferences = context.getSharedPreferences("VA", Context.MODE_PRIVATE);
 //        String playerId = preferences.getString("playerId", null);
-//        nameValuePairs.add(new BasicNameValuePair("userid", playerId));
-        nameValuePairs.add(new BasicNameValuePair("userid", "kiran12345"));
+        nameValuePairs.add(new BasicNameValuePair("userid", Constants.userID));
+//        nameValuePairs.add(new BasicNameValuePair("userid", "kiran12345"));
         try {
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(Constants.TEST_IMAGE_URL);
