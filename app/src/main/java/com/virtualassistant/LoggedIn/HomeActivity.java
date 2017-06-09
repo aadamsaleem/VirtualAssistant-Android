@@ -62,6 +62,7 @@ public class HomeActivity extends AppCompatActivity implements TextToSpeech.OnIn
         SharedPreferences prefs = getSharedPreferences("VA", MODE_PRIVATE);
         firstLaunch = prefs.getBoolean("firstLaunch", true);
         playerId = prefs.getString("playerId",null);
+        Constants.userID = playerId;
 
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent startingIntent = this.getIntent();
